@@ -1,0 +1,106 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  name      String
+  phone     String   @unique
+  email     String?  @unique
+  password  String
+  role      String   @default("STAFF")
+  createdAt DateTime @default(now())
+}
+
+model Category {
+  id        Int       @id @default(autoincrement())
+  name      String    @unique
+  createdAt DateTime  @default(now())
+  products  Product[]
+}
+
+model Product {
+  id            Int         @id @default(autoincrement())
+  name          String
+  price         Float
+  quantity      Int
+  minStockLimit Int         @default(5)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  categoryId    Int?
+  orderItems    OrderItem[]
+  category      Category?   @relation(fields: [categoryId], references: [id])
+}
+
+model Customer {
+  id           Int                @id @default(autoincrement())
+  name         String
+  phone        String             @unique
+  address      String?
+  createdAt    DateTime           @default(now())
+  transactions KhataTransaction[]
+  orders       Order[]
+}
+
+model Order {
+  id            Int         @id @default(autoincrement())
+  customerId    Int?
+  totalAmount   Float
+  discount      Float       @default(0)
+  finalAmount   Float
+  paymentMethod String      @default("CASH")
+  status        String      @default("COMPLETED")
+  createdAt     DateTime    @default(now())
+  customer      Customer?   @relation(fields: [customerId], references: [id])
+  items         OrderItem[]
+}
+
+model OrderItem {
+  id        Int      @id @default(autoincrement())
+  orderId   Int
+  productId Int
+  quantity  Int
+  price     Float
+  createdAt DateTime @default(now())
+  order     Order    @relation(fields: [orderId], references: [id])
+  product   Product  @relation(fields: [productId], references: [id])
+}
+
+model KhataTransaction {
+  id         Int      @id @default(autoincrement())
+  customerId Int
+  amount     Float
+  type       String
+  notes      String?
+  createdAt  DateTime @default(now())
+  customer   Customer @relation(fields: [customerId], references: [id])
+}
+
+model Expense {
+  id          Int      @id @default(autoincrement())
+  amount      Float
+  category    String
+  description String?
+  date        DateTime @default(now())
+  createdAt   DateTime @default(now())
+}
+
+model Supplier {
+  id        Int      @id @default(autoincrement())
+  name      String
+  phone     String?  @unique
+  email     String?
+  address   String?
+  createdAt DateTime @default(now())
+}
+
+model Setting {
+  id    Int    @id @default(autoincrement())
+  key   String @unique
+  value String
+}
