@@ -29,6 +29,7 @@ model Product {
   name          String
   price         Float
   quantity      Int
+  unit          String      @default("Pcs")
   minStockLimit Int         @default(5)
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt

@@ -27,7 +27,7 @@ export const getProductById = async (req, res) => {
 
 export const createProduct = async (req, res) => {
   try {
-    const { name, price, quantity, categoryId, minStockLimit } = req.body;
+    const { name, price, quantity, categoryId, minStockLimit, unit } = req.body;
     const product = await prisma.product.create({
       data: {
         name,
@@ -35,6 +35,7 @@ export const createProduct = async (req, res) => {
         quantity,
         categoryId: categoryId ? Number(categoryId) : null,
         minStockLimit,
+        unit: unit || 'Pcs'
       },
       include: { category: true },
     });
@@ -46,7 +47,7 @@ export const createProduct = async (req, res) => {
 
 export const updateProduct = async (req, res) => {
   try {
-    const { name, price, quantity, categoryId, minStockLimit } = req.body;
+    const { name, price, quantity, categoryId, minStockLimit, unit } = req.body;
     const product = await prisma.product.update({
       where: { id: Number(req.params.id) },
       data: {
@@ -55,6 +56,7 @@ export const updateProduct = async (req, res) => {
         quantity,
         categoryId: categoryId !== undefined ? (categoryId ? Number(categoryId) : null) : undefined,
         minStockLimit,
+        unit: unit !== undefined ? unit : undefined
       },
       include: { category: true },
     });

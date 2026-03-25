@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import api from '../api/axios';
 import { Package, Users, IndianRupee, TrendingUp, Activity } from 'lucide-react';
 
@@ -13,6 +14,7 @@ interface Summary {
 
 const Dashboard = () => {
   const [data, setData] = useState<Summary | null>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     api.get('/dashboard/summary').then(res => setData(res.data));
@@ -34,7 +36,10 @@ const Dashboard = () => {
       </div>
 
       <div className="grid grid-cols-2 gap-4">
-        <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center justify-center">
+        <div 
+          onClick={() => navigate('/inventory')}
+          className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center justify-center cursor-pointer hover:shadow-md hover:border-blue-200 transition-all active:scale-95"
+        >
           <div className="bg-blue-50 text-blue-500 p-3 rounded-full mb-2">
             <Package size={24} />
           </div>
@@ -42,7 +47,10 @@ const Dashboard = () => {
           <p className="text-xs text-gray-500 font-medium tracking-wide">PRODUCTS</p>
         </div>
 
-        <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center justify-center">
+        <div 
+          onClick={() => navigate('/customers')}
+          className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center justify-center cursor-pointer hover:shadow-md hover:border-purple-200 transition-all active:scale-95"
+        >
           <div className="bg-purple-50 text-purple-500 p-3 rounded-full mb-2">
             <Users size={24} />
           </div>
@@ -58,7 +66,10 @@ const Dashboard = () => {
           <p className="text-xs text-gray-500 font-medium tracking-wide">EXPENSES</p>
         </div>
         
-        <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center justify-center outline outline-1 outline-primary/20">
+        <div 
+          onClick={() => navigate('/khata')}
+          className="bg-white p-4 rounded-2xl shadow-[0_0_15px_rgba(var(--color-primary),0.1)] outline outline-1 outline-primary/30 flex flex-col items-center justify-center cursor-pointer hover:bg-primary/5 transition-all active:scale-95"
+        >
           <h3 className="text-2xl font-bold text-gray-800">{data.totalOrders}</h3>
           <p className="text-xs text-primary font-medium tracking-wide">BILLS MADE</p>
         </div>

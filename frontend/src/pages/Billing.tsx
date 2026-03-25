@@ -3,7 +3,7 @@ import api from '../api/axios';
 import { ShoppingCart, Plus, Minus, Trash2, Search, FileText } from 'lucide-react';
 import { jsPDF } from 'jspdf';
 
-interface Product { id: number; name: string; price: number; quantity: number; }
+interface Product { id: number; name: string; price: number; quantity: number; unit: string; }
 interface CartItem extends Product { cartQuantity: number; }
 
 const Billing = () => {
@@ -124,7 +124,7 @@ const Billing = () => {
     doc.setFont("helvetica", "normal");
     cart.forEach(item => {
       doc.text(item.name, 25, y);
-      doc.text(item.cartQuantity.toString(), 110, y);
+      doc.text(`${item.cartQuantity} ${item.unit || 'Pcs'}`, 110, y);
       doc.text(`${item.price * item.cartQuantity}`, 170, y);
       y += 8;
     });
@@ -210,7 +210,7 @@ const Billing = () => {
                   <div key={p.id} onClick={() => p.quantity > 0 && addToCart(p)} className={`p-3 rounded-xl flex items-center gap-3 cursor-pointer transition-all border shadow-sm active:scale-[0.98] ${cartItem ? "bg-primary/5 border-primary" : "bg-white border-gray-50"}`}>
                     <div className="flex-1 min-w-0">
                       <h4 className="font-black text-gray-900 text-sm italic truncate">{p.name}</h4>
-                      <p className="text-[9px] text-gray-400 font-black uppercase mt-0.5">₹{p.price} · {p.quantity} Left</p>
+                      <p className="text-[9px] text-gray-400 font-black uppercase mt-0.5">₹{p.price} · {p.quantity} {p.unit || 'Pcs'} Left</p>
                     </div>
                     {cartItem && <span className="bg-primary text-white w-6 h-6 rounded-full flex items-center justify-center text-[12px] font-bold">{cartItem.cartQuantity}</span>}
                   </div>
@@ -244,7 +244,7 @@ const Billing = () => {
               <div key={item.id} className="bg-white rounded-[1.5rem] p-6 shadow-sm border border-gray-100 flex items-center gap-4 transition-all active:scale-[0.99]">
                 <div className="flex-1">
                   <h4 className="font-black text-gray-900 text-sm italic leading-none">{item.name}</h4>
-                  <p className="text-[10px] font-black text-gray-400 uppercase mt-2">₹{item.price} each</p>
+                  <p className="text-[10px] font-black text-gray-400 uppercase mt-2">₹{item.price} per {item.unit || 'Unit'}</p>
                 </div>
                 <div className="flex items-center gap-3 bg-gray-50 rounded-xl border border-gray-100 p-1.5">
                   <button onClick={(e) => { e.stopPropagation(); updateQuantity(item.id, -1); }} className="p-1 hover:text-primary text-gray-400 transition-colors"><Minus size={16} strokeWidth={3} /></button>

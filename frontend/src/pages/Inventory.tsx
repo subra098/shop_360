@@ -14,6 +14,7 @@ interface Product {
   name: string;
   price: number;
   quantity: number;
+  unit: string;
   categoryId: number | null;
   category: Category | null;
 }
@@ -27,7 +28,8 @@ const Inventory = () => {
   // Modal state
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
-  const [formData, setFormData] = useState({ id: 0, name: '', price: '', quantity: '', categoryId: '' });
+  const [formData, setFormData] = useState({ id: 0, name: '', price: '', quantity: '', categoryId: '', unit: 'Pcs' });
+  const [isCustomUnit, setIsCustomUnit] = useState(false);
   const [categoryName, setCategoryName] = useState('');
 
   const fetchData = async () => {
@@ -53,6 +55,7 @@ const Inventory = () => {
       name: formData.name,
       price: Number(formData.price),
       quantity: Number(formData.quantity),
+      unit: formData.unit,
       categoryId: formData.categoryId ? Number(formData.categoryId) : null
     };
     
@@ -87,8 +90,11 @@ const Inventory = () => {
       name: p.name, 
       price: p.price.toString(), 
       quantity: p.quantity.toString(), 
-      categoryId: p.categoryId?.toString() || '' 
+      categoryId: p.categoryId?.toString() || '',
+      unit: p.unit || 'Pcs'
     });
+    const commonUnits = ['kg', 'Liter', 'Pcs'];
+    setIsCustomUnit(!commonUnits.includes(p.unit || 'Pcs'));
     setIsModalOpen(true);
   };
 
@@ -124,7 +130,7 @@ const Inventory = () => {
       <div className="space-y-3 pb-24">
         {filteredProducts.map(p => (
           <div key={p.id} className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex justify-between items-center">
-            <div>
+            <div className="flex-1">
               <div className="flex items-center gap-2">
                 <h3 className="font-semibold text-gray-800">{p.name}</h3>
                 {p.category && (
@@ -133,7 +139,9 @@ const Inventory = () => {
                   </span>
                 )}
               </div>
-              <p className="text-xs text-gray-500 mt-1">Stock: <span className={p.quantity < 5 ? 'text-red-500 font-bold' : ''}>{p.quantity}</span> • ₹{p.price}</p>
+              <p className="text-xs text-gray-500 mt-1">
+                Stock: <span className={p.quantity < 5 ? 'text-red-500 font-bold' : ''}>{p.quantity} {p.unit || 'Pcs'}</span> • ₹{p.price}
+              </p>
             </div>
             {user?.role === 'ADMIN' && (
               <div className="flex flex-col gap-2">
@@ -148,14 +156,12 @@ const Inventory = () => {
         )}
       </div>
 
-      {user?.role === 'ADMIN' && (
         <button 
-          onClick={() => { setFormData({ id: 0, name: '', price: '', quantity: '', categoryId: '' }); setIsModalOpen(true); }}
+          onClick={() => { setFormData({ id: 0, name: '', price: '', quantity: '', categoryId: '', unit: 'Pcs' }); setIsCustomUnit(false); setIsModalOpen(true); }}
           className="fixed bottom-24 right-4 bg-primary text-white p-4 rounded-full shadow-lg hover:shadow-xl transition-all z-30"
         >
           <Plus size={24} />
         </button>
-      )}
 
       {/* Product Modal */}
       {isModalOpen && (
@@ -164,10 +170,41 @@ const Inventory = () => {
             <h3 className="text-lg font-bold text-gray-800">{formData.id ? 'Edit' : 'Add'} Product</h3>
             <form onSubmit={handleSubmit} className="space-y-3">
               <input required type="text" placeholder="Name" className="w-full p-3 bg-gray-50 rounded-xl border border-gray-200 outline-none focus:ring-2 ring-primary/20" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} />
-              <div className="flex gap-2">
-                <input required type="number" placeholder="Price (₹)" className="w-1/2 p-3 bg-gray-50 rounded-xl border border-gray-200 outline-none focus:ring-2 ring-primary/20" value={formData.price} onChange={e => setFormData({...formData, price: e.target.value})} />
-                <input required type="number" placeholder="Quantity" className="w-1/2 p-3 bg-gray-50 rounded-xl border border-gray-200 outline-none focus:ring-2 ring-primary/20" value={formData.quantity} onChange={e => setFormData({...formData, quantity: e.target.value})} />
+              <div className="grid grid-cols-2 gap-2">
+                <input required type="number" placeholder="Price (₹)" className="p-3 bg-gray-50 rounded-xl border border-gray-200 outline-none focus:ring-2 ring-primary/20" value={formData.price} onChange={e => setFormData({...formData, price: e.target.value})} />
+                <div className="flex gap-1">
+                   <input required type="number" placeholder="Qty" className="w-2/3 p-3 bg-gray-50 rounded-xl border border-gray-200 outline-none focus:ring-2 ring-primary/20" value={formData.quantity} onChange={e => setFormData({...formData, quantity: e.target.value})} />
+                   <select 
+                     className="w-1/3 p-2 bg-gray-50 rounded-xl border border-gray-200 outline-none text-xs font-bold"
+                     value={isCustomUnit ? 'Others' : formData.unit}
+                     onChange={e => {
+                       if (e.target.value === 'Others') {
+                         setIsCustomUnit(true);
+                         setFormData({...formData, unit: ''});
+                       } else {
+                         setIsCustomUnit(false);
+                         setFormData({...formData, unit: e.target.value});
+                       }
+                     }}
+                   >
+                     <option value="Pcs">Pcs</option>
+                     <option value="kg">kg</option>
+                     <option value="Liter">Liter</option>
+                     <option value="Others">Others</option>
+                   </select>
+                </div>
               </div>
+
+              {isCustomUnit && (
+                <input 
+                  required 
+                  type="text" 
+                  placeholder="Enter manual unit (e.g. Box, Gm)" 
+                  className="w-full p-3 bg-primary/5 rounded-xl border border-primary/20 outline-none focus:ring-2 ring-primary/20 text-xs font-bold" 
+                  value={formData.unit} 
+                  onChange={e => setFormData({...formData, unit: e.target.value})} 
+                />
+              )}
               
               <div className="space-y-1">
                 <label className="text-xs text-gray-500 px-1">Category</label>
