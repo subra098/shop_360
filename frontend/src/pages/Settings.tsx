@@ -1,4 +1,3 @@
-import React from 'react';
 import { useAuth } from '../context/AuthContext';
 import { LogOut, User, Shield, Info } from 'lucide-react';
 
